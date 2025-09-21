@@ -481,3 +481,21 @@ def export_school_attendance(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename=school_{admin.school_id}_attendance.xlsx"},
     )
+    
+# ----------------------------
+# 🎓 List Students by Class
+# ----------------------------
+@router.get("/classes/{class_id}/students", response_model=List[schemas.StudentOut], dependencies=[Depends(admin_required)])
+def list_students_by_class(class_id: int, db: Session = Depends(get_db), admin=Depends(get_admin_user)):
+    """
+    List all students in a specific class for this administrator's school.
+    """
+    school = get_admin_school(db, admin.id)
+    
+    # Ensure class belongs to this admin's school
+    db_class = db.query(models.Class).filter(models.Class.id == class_id, models.Class.school_id == school.id).first()
+    if not db_class:
+        raise HTTPException(status_code=404, detail="Class not found in your school")
+    
+    students = db.query(models.Student).filter(models.Student.class_id == db_class.id).all()
+    return students

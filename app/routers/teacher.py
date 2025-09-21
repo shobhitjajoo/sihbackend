@@ -44,6 +44,34 @@ def get_students(
 
 
 # ----------------------------
+# 👨‍🏫 Get Teacher's Classes
+# ----------------------------
+from sqlalchemy.orm import joinedload
+
+@router.get("/classes")
+def get_teacher_classes(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    teacher = get_teacher_user(current_user, db)
+    
+    # Preload students to avoid N+1 queries
+    teacher = (
+        db.query(models.Teacher)
+        .options(joinedload(models.Teacher.classes).joinedload(models.Class.students))
+        .filter(models.Teacher.id == teacher.id)
+        .first()
+    )
+
+    return [
+        {
+            "class_id": cls.id,
+            "class_name": cls.name,
+            "total_students": len(cls.students),
+        }
+        for cls in teacher.classes
+    ]
+# ----------------------------
 # 📝 Attendance Management
 # ----------------------------
 

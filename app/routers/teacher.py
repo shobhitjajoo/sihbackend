@@ -84,15 +84,17 @@ def mark_student_attendance(
 ):
     teacher = get_teacher_user(current_user, db)
     class_ids = [c.id for c in teacher.classes]
+
     student = (
-    db.query(models.Student)
-    .filter(models.Student.id == student_id, models.Student.class_id.in_(class_ids))
-    .first()
-)
+        db.query(models.Student)
+        .filter(models.Student.id == student_id, models.Student.class_id.in_(class_ids))
+        .first()
+    )
     if not student:
         raise HTTPException(status_code=404, detail="Student not found in your class")
-# Prevent duplicate marking for same date
-    existing = (
+
+    # Check if attendance already exists for today
+    attendance = (
         db.query(models.Attendance)
         .filter(
             models.Attendance.student_id == student.id,
@@ -100,20 +102,24 @@ def mark_student_attendance(
         )
         .first()
     )
-    if existing:
-        raise HTTPException(status_code=400, detail="Attendance already marked for today")
-    attendance = models.Attendance(
-        student_id=student.id,
-        teacher_id=teacher.id,
-        date=date.today(),
-        status=status,
-    )
-    db.add(attendance)
+
+    if attendance:
+        # Override existing attendance
+        attendance.status = status
+    else:
+        # Create new attendance
+        attendance = models.Attendance(
+            student_id=student.id,
+            teacher_id=teacher.id,
+            date=date.today(),
+            status=status,
+        )
+        db.add(attendance)
+
     db.commit()
     db.refresh(attendance)
+
     return {"detail": "Attendance marked", "attendance_id": attendance.id}
-
-
 # ----------------------------
 # 📊 Attendance Reports
 # ----------------------------

@@ -16,3 +16,6 @@ venv/
 
 # Alembic migrations cache
 alembic/__pycache__/
+# Alembic migrations cache
+migrations/__pycache__/
+migrations/versions/__pycache__/

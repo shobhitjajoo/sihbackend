@@ -147,6 +147,7 @@ class StudentUpdate(BaseModel):
     roll_no: Optional[str] = None
     class_id: Optional[int] = None
     school_id: Optional[int] = None
+    face_embedding: Optional[list[float]]=None
 
 class StudentOut(StudentBase):
     id: int

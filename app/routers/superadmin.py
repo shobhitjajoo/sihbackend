@@ -209,12 +209,20 @@ def list_students(db: Session = Depends(get_db)):
 
 
 @router.put("/students/{student_id}", response_model=schemas.StudentOut, dependencies=[Depends(superadmin_required)])
-def update_student(student_id: int, update: schemas.StudentCreate, db: Session = Depends(get_db)):
+def update_student(
+    student_id: int,
+    update: schemas.StudentUpdate,  # <-- Use Update schema so all fields are optional
+    db: Session = Depends(get_db)
+):
     student = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
-    for key, value in update.dict().items():
+    
+    # Update only provided fields
+    update_data = update.dict(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(student, key, value)
+
     db.commit()
     db.refresh(student)
     return student

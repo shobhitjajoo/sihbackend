@@ -291,6 +291,13 @@ def update_student(
         db_student.name = student.name
     if student.roll_no:
         db_student.roll_no = student.roll_no
+    if student.class_id:
+        db_student.class_id = student.class_id
+    if student.school_id:
+        db_student.school_id = student.school_id
+    if student.face_embedding:
+        db_student.face_embedding = student.face_embedding
+
 
     db.commit()
     db.refresh(db_student)

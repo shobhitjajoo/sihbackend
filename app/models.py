@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Date, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, JSON
 from sqlalchemy.sql import func
 
 # -----------------------------
@@ -103,6 +103,7 @@ class Student(Base):
     created_at = Column(DateTime, server_default=func.now())
     class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
     school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
+    face_embedding=Column(JSON,nullable=True)
 
     # Relationships
     class_ = relationship("Class", back_populates="students")
